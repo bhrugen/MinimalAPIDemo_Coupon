@@ -62,7 +62,7 @@ app.MapPost("/api/coupon", async (ICouponRepository _couponRepo, IMapper _mapper
             response.ErrorMessages.Add(validationResult.Errors.FirstOrDefault().ToString());
         return Results.BadRequest(response);
     }
-    if (_couponRepo.GetAsync(coupon_C_DTO.Name.ToLower()) != null)
+    if (_couponRepo.GetAsync(coupon_C_DTO.Name).GetAwaiter().GetResult() != null)
     {
             response.ErrorMessages.Add("Coupon Name already Exists");
             return Results.BadRequest(response);
