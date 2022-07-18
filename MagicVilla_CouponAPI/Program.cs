@@ -17,9 +17,9 @@ if (app.Environment.IsDevelopment())
 }
 
 
-app.MapGet("/helloworld", () =>
+app.MapGet("/helloworld/{id:int}", (int id) =>
 {
-    return Results.BadRequest("Exception!!!!");
+    return Results.Ok("Id!!!!"+id);
 
 });
 
