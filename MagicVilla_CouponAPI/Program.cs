@@ -1,3 +1,5 @@
+using MagicVilla_CouponAPI.Data;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,7 +19,9 @@ if (app.Environment.IsDevelopment())
 }
 
 
-
+app.MapGet("/api/coupon", () => {
+    return Results.Ok(CouponStore.couponList);
+});
 
 
 app.UseHttpsRedirection();
