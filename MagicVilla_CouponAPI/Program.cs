@@ -24,6 +24,23 @@ app.MapGet("/api/coupon", () => {
 });
 
 
+app.MapGet("/api/coupon/{id:int}", (int id) => {
+    return Results.Ok(CouponStore.couponList.FirstOrDefault(u=>u.Id==id));
+});
+
+app.MapPost("/api/coupon", () => { 
+
+});
+
+app.MapPut("/api/coupon", () => {
+
+});
+
+app.MapDelete("/api/coupon/{id:int}", (int id) => {
+
+});
+
+
 app.UseHttpsRedirection();
 
 app.Run();
