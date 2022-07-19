@@ -78,21 +78,6 @@ builder.Services.AddAuthentication(x =>
     };
 });
 
-//builder.Authentication.AddJwtBearer(x =>
-//{
-//    x.RequireHttpsMetadata = false;
-//    x.SaveToken = true;
-//    x.TokenValidationParameters = new TokenValidationParameters
-//    {
-//        ValidateIssuerSigningKey = true,
-//        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(
-//            builder.Configuration.GetValue<string>("ApiSettings:Secret"))),
-//        ValidateIssuer = false,
-//        ValidateAudience = false
-
-//    };
-//});
-
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("admin"));
