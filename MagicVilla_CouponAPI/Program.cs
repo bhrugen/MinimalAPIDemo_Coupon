@@ -62,11 +62,26 @@ builder.Services.AddDbContext<ApplicationDbContext>(option =>
     option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddAutoMapper(typeof(MappingConfig));
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
-builder.Services.AddAuthentication(x =>
-{
-    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(x =>
+//builder.Services.AddAuthentication(x =>
+//{
+//    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+//    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+//}).AddJwtBearer(x =>
+//{
+//    x.RequireHttpsMetadata = false;
+//    x.SaveToken = true;
+//    x.TokenValidationParameters = new TokenValidationParameters
+//    {
+//        ValidateIssuerSigningKey = true,
+//        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(
+//            builder.Configuration.GetValue<string>("ApiSettings:Secret"))),
+//        ValidateIssuer = false,
+//        ValidateAudience = false
+
+//    };
+//});
+
+builder.Authentication.AddJwtBearer(x =>
 {
     x.RequireHttpsMetadata = false;
     x.SaveToken = true;
@@ -80,6 +95,7 @@ builder.Services.AddAuthentication(x =>
 
     };
 });
+
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("admin"));
@@ -100,4 +116,31 @@ app.ConfigureCouponEndpoints();
 app.ConfigureAuthEndpoints();
 app.UseHttpsRedirection();
 
+
+
+app.MapGet("/api/coupon/special", ( [AsParameters] CouponRequest req, ApplicationDbContext _db) =>
+{
+    if (req.CouponName != null)
+    {
+        return _db.Coupons.Where(u => u.Name.Contains(req.CouponName)).Skip((req.Page - 1) * req.PageSize).Take(req.PageSize);
+    }
+    return _db.Coupons.Skip((req.Page - 1) * req.PageSize).Take(req.PageSize);
+});
+
+
+
+
+
+
 app.Run();
+
+
+class CouponRequest
+{
+    public string CouponName { get; set; }
+    [FromHeader(Name = "PageSize")]
+    public int PageSize { get; set; }
+    [FromHeader(Name = "Page")]
+    public int Page { get; set; }
+    public ILogger<CouponRequest> Logger { get; set; }
+}
