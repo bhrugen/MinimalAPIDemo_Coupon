@@ -16,7 +16,7 @@ namespace MagicVilla_CouponAPI.Endpoints
                        
             app.MapPost("/api/login", Login).WithName("Login").Accepts<LoginRequestDTO>("application/json")
                 .Produces<APIResponse>(200).Produces(400);
-            app.MapPost("/api/login", Register).WithName("Register").Accepts<RegisterationRequestDTO>("application/json")
+            app.MapPost("/api/register", Register).WithName("Register").Accepts<RegisterationRequestDTO>("application/json")
                 .Produces<APIResponse>(200).Produces(400);
         }
 
