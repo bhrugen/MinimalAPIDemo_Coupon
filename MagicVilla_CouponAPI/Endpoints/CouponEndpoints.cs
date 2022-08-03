@@ -15,10 +15,34 @@ namespace MagicVilla_CouponAPI.Endpoints
         {
 
             app.MapGet("/api/coupon", GetAllCoupon)
-                .WithName("GetCoupons").Produces<APIResponse>(200).RequireAuthorization("AdminOnly") ;
+                .WithName("GetCoupons").Produces<APIResponse>(200);
+                //.RequireAuthorization("AdminOnly") ;
 
             app.MapGet("/api/coupon/{id:int}", GetCoupon)
-                .WithName("GetCoupon").Produces<APIResponse>(200);
+                .WithName("GetCoupon").Produces<APIResponse>(200)
+                .AddFilter(async (context, next) =>
+                {
+                    var id = context.GetArgument<int>(2);
+                    if (id == 0)
+                    {
+                        return Results.BadRequest("Cannot have 0 in id");
+                    }
+                    //action to do before execution of endpoint
+                    Console.WriteLine("Before 1st filter");
+                    var result = await next(context);
+                    //action to do after execution of endpoint
+                    Console.WriteLine("After 1st filter");
+                    return result;
+                })
+                .AddFilter(async (context, next) =>
+                {
+                    //action to do before execution of endpoint
+                    Console.WriteLine("Before 2nd filter");
+                    var result = await next(context);
+                    //action to do after execution of endpoint
+                    Console.WriteLine("After 2nd filter");
+                    return result;
+                });
 
             app.MapPost("/api/coupon", CreateCoupon).WithName("CreateCoupon").Accepts<CouponCreateDTO>("application/json").Produces<APIResponse>(201).Produces(400);
 
@@ -30,13 +54,14 @@ namespace MagicVilla_CouponAPI.Endpoints
         
         private async static Task<IResult> GetCoupon(ICouponRepository _couponRepo, ILogger<Program> _logger, int id)
         {
+            Console.WriteLine("Endpoint executed.");
             APIResponse response = new();
             response.Result = await _couponRepo.GetAsync(id);
             response.IsSuccess = true;
             response.StatusCode = HttpStatusCode.OK;
             return Results.Ok(response);
         }
-        [Authorize]
+       // [Authorize]
         private async static Task<IResult> CreateCoupon(ICouponRepository _couponRepo, IMapper _mapper,
                 IValidator<CouponCreateDTO> _validation, [FromBody] CouponCreateDTO coupon_C_DTO)
         {
@@ -69,7 +94,7 @@ namespace MagicVilla_CouponAPI.Endpoints
             //return Results.CreatedAtRoute("GetCoupon",new { id=coupon.Id }, couponDTO);
             //return Results.Created($"/api/coupon/{coupon.Id}",coupon);
         }
-        [Authorize]
+       // [Authorize]
         private async static Task<IResult> UpdateCoupon(ICouponRepository _couponRepo, IMapper _mapper,
                 IValidator<CouponUpdateDTO> _validation, [FromBody] CouponUpdateDTO coupon_U_DTO)
         {
@@ -91,7 +116,7 @@ namespace MagicVilla_CouponAPI.Endpoints
             response.StatusCode = HttpStatusCode.OK;
             return Results.Ok(response);
         }
-        [Authorize]
+      //  [Authorize]
         private async static Task<IResult> DeleteCoupon(ICouponRepository _couponRepo, int id)
         {
             APIResponse response = new() { IsSuccess = false, StatusCode = HttpStatusCode.BadRequest };
