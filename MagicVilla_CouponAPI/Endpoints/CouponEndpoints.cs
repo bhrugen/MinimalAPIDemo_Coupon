@@ -23,12 +23,20 @@ namespace MagicVilla_CouponAPI.Endpoints
                 .WithName("GetCoupon").Produces<APIResponse>(200)
                 .AddFilter<ParameterIDValidator>();
 
-            app.MapPost("/api/coupon", CreateCoupon).WithName("CreateCoupon").Accepts<CouponCreateDTO>("application/json").Produces<APIResponse>(201).Produces(400);
+            app.MapPost("/api/coupon", CreateCoupon)
+                .WithName("CreateCoupon")
+                .Accepts<CouponCreateDTO>("application/json")
+                .Produces<APIResponse>(201)
+                .Produces(400)
+                .AddFilter<BasicValidator<CouponCreateDTO>>();
 
-            app.MapPut("/api/coupon", UpdateCoupon).WithName("UpdateCoupon")
-                .Accepts<CouponUpdateDTO>("application/json").Produces<APIResponse>(200).Produces(400);
+            app.MapPut("/api/coupon", UpdateCoupon)
+                .WithName("UpdateCoupon")
+                .Accepts<CouponUpdateDTO>("application/json")
+                .Produces<APIResponse>(200).Produces(400)
+                .AddFilter<BasicValidator<CouponUpdateDTO>>();
 
-            app.MapDelete("/api/coupon/{id:int}",DeleteCoupon);
+            app.MapDelete("/api/coupon/{id:int}",DeleteCoupon).AddFilter<ParameterIDValidator>();
         }
         
         private async static Task<IResult> GetCoupon(ICouponRepository _couponRepo, ILogger<Program> _logger, int id)
@@ -42,16 +50,10 @@ namespace MagicVilla_CouponAPI.Endpoints
         }
        // [Authorize]
         private async static Task<IResult> CreateCoupon(ICouponRepository _couponRepo, IMapper _mapper,
-                IValidator<CouponCreateDTO> _validation, [FromBody] CouponCreateDTO coupon_C_DTO)
+                 [FromBody] CouponCreateDTO coupon_C_DTO)
         {
             APIResponse response = new() { IsSuccess = false, StatusCode = HttpStatusCode.BadRequest };
 
-            var validationResult = await _validation.ValidateAsync(coupon_C_DTO);
-            if (!validationResult.IsValid)
-            {
-                response.ErrorMessages.Add(validationResult.Errors.FirstOrDefault().ToString());
-                return Results.BadRequest(response);
-            }
             if (_couponRepo.GetAsync(coupon_C_DTO.Name).GetAwaiter().GetResult() != null)
             {
                 response.ErrorMessages.Add("Coupon Name already Exists");
@@ -75,18 +77,11 @@ namespace MagicVilla_CouponAPI.Endpoints
         }
        // [Authorize]
         private async static Task<IResult> UpdateCoupon(ICouponRepository _couponRepo, IMapper _mapper,
-                IValidator<CouponUpdateDTO> _validation, [FromBody] CouponUpdateDTO coupon_U_DTO)
+                 [FromBody] CouponUpdateDTO coupon_U_DTO)
         {
             APIResponse response = new() { IsSuccess = false, StatusCode = HttpStatusCode.BadRequest };
 
-            var validationResult = await _validation.ValidateAsync(coupon_U_DTO);
-            if (!validationResult.IsValid)
-            {
-                response.ErrorMessages.Add(validationResult.Errors.FirstOrDefault().ToString());
-                return Results.BadRequest(response);
-            }
-
-
+           
             await _couponRepo.UpdateAsync(_mapper.Map<Coupon>(coupon_U_DTO));
             await _couponRepo.SaveAsync();
 
