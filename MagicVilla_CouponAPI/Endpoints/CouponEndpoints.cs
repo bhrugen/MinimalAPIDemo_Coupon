@@ -6,6 +6,7 @@ using MagicVilla_CouponAPI.Repository.IRepository;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using MagicVilla_CouponAPI.Filters;
 
 namespace MagicVilla_CouponAPI.Endpoints
 {
@@ -20,29 +21,7 @@ namespace MagicVilla_CouponAPI.Endpoints
 
             app.MapGet("/api/coupon/{id:int}", GetCoupon)
                 .WithName("GetCoupon").Produces<APIResponse>(200)
-                .AddFilter(async (context, next) =>
-                {
-                    var id = context.GetArgument<int>(2);
-                    if (id == 0)
-                    {
-                        return Results.BadRequest("Cannot have 0 in id");
-                    }
-                    //action to do before execution of endpoint
-                    Console.WriteLine("Before 1st filter");
-                    var result = await next(context);
-                    //action to do after execution of endpoint
-                    Console.WriteLine("After 1st filter");
-                    return result;
-                })
-                .AddFilter(async (context, next) =>
-                {
-                    //action to do before execution of endpoint
-                    Console.WriteLine("Before 2nd filter");
-                    var result = await next(context);
-                    //action to do after execution of endpoint
-                    Console.WriteLine("After 2nd filter");
-                    return result;
-                });
+                .AddFilter<ParameterIDValidator>();
 
             app.MapPost("/api/coupon", CreateCoupon).WithName("CreateCoupon").Accepts<CouponCreateDTO>("application/json").Produces<APIResponse>(201).Produces(400);
 
